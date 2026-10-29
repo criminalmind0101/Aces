@@ -1,0 +1,12 @@
+{
+  "name": "ACES",
+  "short_name": "ACES",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#050912",
+  "theme_color": "#050912",
+  "icons": [
+    { "src": "icon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any" }
+  ]
+}
