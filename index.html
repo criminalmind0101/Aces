@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="ur-Latn">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#050912">
+<link rel="manifest" href="manifest.json">
+<link rel="icon" href="icon.svg">
+<title>ACES</title>
+<style>
+:root{--c:#27e1ff;--c2:#7a5cff;--tx:#d8f6ff;--dim:#6f93a3}
+*{box-sizing:border-box}
+html,body{height:100%;margin:0}
+body{background:radial-gradient(circle at 50% 18%,#0b1d33,#050912 65%);color:var(--tx);font-family:system-ui,sans-serif;display:flex;flex-direction:column;padding:env(safe-area-inset-top) 0 env(safe-area-inset-bottom)}
+header{display:flex;justify-content:space-between;align-items:center;padding:10px 16px}
+h1{font-size:16px;letter-spacing:6px;margin:0;color:var(--c);text-shadow:0 0 10px var(--c)}
+button{font:inherit;color:var(--c);background:#0a1a2a;border:1px solid #27e1ff55;border-radius:10px;padding:8px 12px}
+button:active{background:#12304a}
+#core{position:relative;width:110px;height:110px;margin:0 auto 6px;flex:none}
+#core i{position:absolute;inset:0;border-radius:50%;border:2px solid transparent;border-top-color:var(--c);border-bottom-color:var(--c2);animation:sp 6s linear infinite;filter:drop-shadow(0 0 6px var(--c))}
+#core i:nth-child(2){inset:14px;animation-duration:4s;animation-direction:reverse;border-top-color:var(--c2);border-bottom-color:var(--c)}
+#core i:nth-child(3){inset:30px;animation-duration:2.5s}
+#core b{position:absolute;inset:44px;border-radius:50%;background:var(--c);box-shadow:0 0 25px var(--c);animation:pu 3s ease-in-out infinite}
+body[data-s=busy] #core i{animation-duration:1s}
+body[data-s=busy] #core b{animation-duration:.6s;background:var(--c2);box-shadow:0 0 30px var(--c2)}
+@keyframes sp{to{transform:rotate(360deg)}}
+@keyframes pu{50%{transform:scale(1.35);opacity:.7}}
+#st{text-align:center;font-size:12px;color:var(--dim);margin-bottom:6px;letter-spacing:2px}
+#log{flex:1;overflow-y:auto;padding:8px 14px;display:flex;flex-direction:column;gap:8px}
+.m{max-width:85%;padding:9px 12px;border-radius:14px;line-height:1.4;white-space:pre-wrap;word-break:break-word;font-size:15px}
+.a{align-self:flex-start;background:#0b2236;border:1px solid #27e1ff40}
+.u{align-self:flex-end;background:#1b1c4a;border:1px solid #7a5cff66}
+form{display:flex;gap:8px;padding:10px 12px}
+input,select{font:inherit;color:var(--tx);background:#08111d;border:1px solid #27e1ff55;border-radius:12px;padding:12px;min-width:0}
+#q{flex:1}
+#set{position:fixed;inset:0;background:#050912f2;padding:20px;display:none;flex-direction:column;gap:14px;overflow:auto;z-index:5}
+#set.on{display:flex}
+p.n{color:var(--dim);font-size:13px;margin:0}
+@media (prefers-reduced-motion:reduce){#core i,#core b{animation:none}}
+</style>
+</head>
+<body data-s="idle">
+<header><h1>ACES</h1><button id="gear" type="button">Settings</button></header>
+<div id="core"><i></i><i></i><i></i><b></b></div>
+<div id="st">IDLE</div>
+<div id="log" aria-live="polite"></div>
+<form id="f"><input id="q" autocomplete="off" placeholder="ACES se kuch kaho..."><button>Bhejo</button></form>
+<div id="set">
+<h2 style="color:var(--c);margin:0">Settings</h2>
+<label>Conversation style
+<select id="sty" style="width:100%;margin-top:6px"><option>Friendly</option><option>Professional</option><option>Playful</option><option>Sassy</option><option>Calm</option><option>Caring</option></select></label>
+<p class="n">Style save hota hai, lekin use Stage 2 (AI) mein hoga.</p>
+<button id="ch" type="button">Chat history clear karo</button>
+<button id="ct" type="button">Saare tasks clear karo</button>
+<p class="n">Privacy: sab kuch sirf aapke phone ke browser mein save hota hai. Abhi koi data kahin nahi bheja jata.</p>
+<button id="x" type="button">Band karo</button>
+</div>
+<script>
+const $=s=>document.querySelector(s),log=$('#log');
+const ls={get(k,d){try{const v=localStorage.getItem(k);return v===null?d:JSON.parse(v)}catch(e){return d}},set(k,v){try{localStorage.setItem(k,JSON.stringify(v))}catch(e){}}};
+let hist=ls.get('hist',[]),tasks=ls.get('tasks',[]);
+const say=(w,t,save=true)=>{const d=document.createElement('div');d.className='m '+w;d.textContent=t;log.append(d);log.scrollTop=log.scrollHeight;if(save){hist.push([w,t]);hist=hist.slice(-100);ls.set('hist',hist)}};
+const st=s=>{document.body.dataset.s=s;$('#st').textContent=s==='busy'?'THINKING':'IDLE'};
+const go=u=>{window.open(u,'_blank')||(location.href=u)};
+const enc=encodeURIComponent;
+const clean=(l,app)=>l.replace(app,'').replace(/\b(par|pe|on|mein|me|search|karo|kro|karna|dhoondo|dhundo|kholo|open|for|ko|ka|ki|hai|ye|yeh)\b/g,'').replace(/\s+/g,' ').trim();
+const HELP='Abhi yeh commands chalti hain:\n• youtube par iron man search karo\n• google par android ai search karo\n• whatsapp kholo\n• whatsapp: main 10 minute mein aa raha hoon\n• instagram kholo\n• task: doodh lana  |  tasks  |  done 1\n• battery\n• 12*(3+4)\nBaaqi baatein AI se hongi (Stage 2).';
+function run(raw){
+ const t=raw.trim(),l=t.toLowerCase();let m;
+ if(/^(help|madad|commands)/.test(l))return HELP;
+ if(/^task\s*:/.test(l)){const x=t.slice(t.indexOf(':')+1).trim();if(!x)return 'Task likho, jaise: task: doodh lana';tasks.push({t:x,d:0});ls.set('tasks',tasks);return 'ACES ke andar save ho gaya: "'+x+'". (Yeh Android reminder nahi, sirf list hai.)'}
+ if(m=l.match(/^done\s+(\d+)/)){const i=m[1]-1;if(!tasks[i])return 'Is number ka task nahi mila.';tasks[i].d=1;ls.set('tasks',tasks);return 'Done mark kar diya: '+tasks[i].t}
+ if(/^(tasks?|kaam)\b/.test(l))return tasks.length?tasks.map((k,i)=>(i+1)+'. '+(k.d?'✓ ':'')+k.t).join('\n'):'Abhi koi task nahi. Likho: task: kaam ka naam';
+ if(l.startsWith('whatsapp')){const i=t.indexOf(':');if(i>0){const x=t.slice(i+1).trim();if(x){go('https://wa.me/?text='+enc(x));return 'WhatsApp khul raha hai, message likha hua hoga. Recipient aap khud chuno aur Send bhi aap dabao.'}}go('whatsapp://send');return 'WhatsApp kholne ki koshish kar rahi hoon. Na khule to mujhe batao.'}
+ for(const [k,home,s] of [['youtube','https://www.youtube.com/','https://www.youtube.com/results?search_query='],['google','https://www.google.com/','https://www.google.com/search?q=']]){
+  if(l.includes(k)){const q=clean(l,k);go(q?s+enc(q):home);return q?k+' par "'+q+'" search khul raha hai.':k+' khul raha hai.'}}
+ if(l.includes('instagram')){const q=clean(l,'instagram');go('https://www.instagram.com/');return q?'Instagram khul raha hai. Link se Instagram ke andar search nahi ho sakta, aap khud "'+q+'" search kar lo.':'Instagram khul raha hai.'}
+ if(/battery/.test(l)){if(!navigator.getBattery)return 'Is browser mein battery info available nahi. Native app (Stage 8) mein hogi.';return navigator.getBattery().then(b=>'Battery '+Math.round(b.level*100)+'%'+(b.charging?' (charging)':''))}
+ if(/^[\d\s+\-*/().%]+$/.test(l)&&/\d/.test(l)&&/[+\-*/%]/.test(l)){try{const r=Function('"use strict";return('+l+')')();if(Number.isFinite(r))return l+' = '+r}catch(e){}return 'Yeh calculation samajh nahi aayi.'}
+ return 'Yeh baat samajhne ke liye AI brain chahiye, jo abhi connect nahi hua (Stage 2). "help" likho to dikhati hoon abhi kya chalta hai.';
+}
+$('#f').onsubmit=e=>{e.preventDefault();const v=$('#q').value.trim();if(!v)return;$('#q').value='';say('u',v);st('busy');
+ Promise.resolve().then(()=>run(v)).then(r=>r&&say('a',r)).catch(()=>say('a','Kuch gadbad ho gayi, dobara try karo.')).finally(()=>setTimeout(()=>st('idle'),300))};
+$('#gear').onclick=()=>$('#set').classList.add('on');
+$('#x').onclick=()=>$('#set').classList.remove('on');
+$('#sty').value=ls.get('style','Friendly');$('#sty').onchange=e=>ls.set('style',e.target.value);
+$('#ch').onclick=()=>{hist=[];ls.set('hist',[]);log.textContent='';$('#set').classList.remove('on')};
+$('#ct').onclick=()=>{tasks=[];ls.set('tasks',[]);say('a','Saare tasks clear kar diye.')};
+hist.forEach(([w,t])=>say(w,t,false));
+if(!hist.length)say('a','Salam! Main ACES hoon. "help" likho to bataungi abhi main kya kya kar sakti hoon.');
+if('serviceWorker' in navigator)navigator.serviceWorker.register('sw.js').catch(()=>{});
+</script>
+</body>
+  </html>
